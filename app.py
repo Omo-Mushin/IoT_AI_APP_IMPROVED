@@ -98,7 +98,7 @@ def load_production_data():
 def load_esp_data():
     try:
         # Try loading real data first
-        esp_data = pd.read_excel("ESP_data.xlsx")
+        esp_data = pd.read_excel("NEW_ESP_DATA.xlsx")
     except Exception as e:
         st.warning(f"Using simulated ESP data: {str(e)}")
         # Create simulated data
