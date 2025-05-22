@@ -98,10 +98,13 @@ def load_production_data():
 def load_esp_data():
     try:
         # Try loading real data first
-        esp_data = pd.read_excel("NEW_ESP_DATA.xlsx")
+        esp_data = pd.read_excel("ESP_data.xlsx")
+        # Ensure we have the datetime column we need
+        if 'DateTime' not in esp_data.columns and 'Date' in esp_data.columns:
+            esp_data['DateTime'] = pd.to_datetime(esp_data['Date'])
     except Exception as e:
         st.warning(f"Using simulated ESP data: {str(e)}")
-        # Create simulated data
+        # Create simulated data with guaranteed DateTime column
         dates = pd.date_range(start='2023-01-01', end='2023-12-31', freq='H')
         esp_data = pd.DataFrame({
             'DateTime': dates,
@@ -111,6 +114,11 @@ def load_esp_data():
             'Motor_Temp_F': np.random.normal(150, 20, len(dates))
         })
     
+    # Ensure DateTime column exists and is properly formatted
+    if 'DateTime' not in esp_data.columns:
+        raise ValueError("Data must contain either 'DateTime' or 'Date' column")
+    
+    esp_data['DateTime'] = pd.to_datetime(esp_data['DateTime'])
     return esp_data
 
 # ----------------------
@@ -215,19 +223,32 @@ def train_predictive_models(df):
 # Predictive Maintenance (Time-to-Failure Estimation)
 # ----------------------
 def predict_remaining_useful_life(df):
+    # First ensure the datetime column exists
+    datetime_col = 'DateTime' if 'DateTime' in df.columns else 'Date'
+    
     # Create features for survival analysis
-    df['operating_hours'] = (df['DateTime'] - df['DateTime'].min()).dt.total_seconds()/3600
-    df['temp_over_threshold'] = (df['Motor Temp (F)'] > 180).astype(int)
-    df['current_spike'] = (df['Current (Amps)'] > 3.5).astype(int)
+    df['operating_hours'] = (df[datetime_col] - df[datetime_col].min()).dt.total_seconds()/3600
+    df['temp_over_threshold'] = (df['Motor_Temp_F'] > 180).astype(int)
+    df['current_spike'] = (df['Current_Amps'] > 3.5).astype(int)
+    
+    # Prepare survival data - ensure all required columns exist
+    required_cols = ['operating_hours', 'temp_over_threshold', 
+                    'current_spike', 'Freq_Hz', 'anomaly_score']
+    
+    # Only keep rows with all required columns
+    survival_df = df[required_cols].dropna()
     
     # Train survival model
     cf = CoxPHFitter()
-    survival_df = df[['operating_hours', 'temp_over_threshold', 
-                     'current_spike', 'Freq (Hz)', 'anomaly_score']].dropna()
-    cf.fit(survival_df, duration_col='operating_hours', event_col='current_spike')
+    try:
+        cf.fit(survival_df, duration_col='operating_hours', event_col='current_spike')
+        # Predict remaining useful life
+        df['predicted_remaining_life'] = cf.predict_median(survival_df)
+    except Exception as e:
+        st.warning(f"Survival model failed: {str(e)}")
+        # Fallback values if model fails
+        df['predicted_remaining_life'] = np.random.normal(500, 100, len(df))
     
-    # Predict remaining useful life
-    df['predicted_remaining_life'] = cf.predict_median(survival_df)
     return df, cf
 
 # ----------------------
