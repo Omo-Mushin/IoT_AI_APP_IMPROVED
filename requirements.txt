@@ -6,3 +6,4 @@ scikit-learn
 lifelines
 statsmodels
 prophet
+openpyxl
