@@ -635,7 +635,7 @@ with tab5:
             color='operating_mode',
             title='Equipment State Clusters'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        # st.plotly_chart(fig, use_container_width=True)
         
         st.subheader("Anomaly Root Causes")
         fig = px.bar(
