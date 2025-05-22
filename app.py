@@ -98,7 +98,7 @@ def load_production_data():
 def load_esp_data():
     try:
         # Try loading real data first
-        esp_data = pd.read_excel("NEW_ESP_data.xlsx")
+        esp_data = pd.read_excel("NEW_ESP_DATA.xlsx")
         # Ensure we have the datetime column we need
         if 'DateTime' not in esp_data.columns and 'Date' in esp_data.columns:
             esp_data['DateTime'] = pd.to_datetime(esp_data['Date'])
