@@ -322,7 +322,7 @@ st.title("🛢️ AI-Powered Oil Well Monitoring Dashboard")
 st.header("Current System Status")
 
 # Explanation box
-with st.expander("ℹ️ What am I looking at?"):
+with st.expander("ℹ️ What am I looking at?", key="overview_expander"):
     st.markdown("""
     This dashboard monitors your oil well equipment in real-time using AI. It shows:
     - **Production Data**: Oil, gas, and water production metrics
@@ -370,7 +370,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 with tab1:
     st.header("Well Production Performance")
     
-    with st.expander("💡 Understanding Production Metrics"):
+    with st.expander("💡 Understanding Production Metrics", key="prod_metrics_expander"):
         st.markdown("""
         - **Gross Production**: Total oil output from your well (barrels per day)
         - **BSW**: Basic Sediment & Water - the percentage of unwanted fluids in your oil
@@ -386,11 +386,7 @@ with tab1:
             template='plotly_white',
             labels={'Gross Act (BBL)': 'Barrels of Oil'}
         )
-        fig.update_layout(
-            yaxis_title="Barrels",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="oil_prod_area")
         
         fig = px.line(
             prod_data, x='Date', y='BSW',
@@ -398,11 +394,7 @@ with tab1:
             template='plotly_white',
             line_shape="spline"
         )
-        fig.update_layout(
-            yaxis_title="Percentage",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="bsw_line")
     
     with col2:
         fig = px.bar(
@@ -411,11 +403,7 @@ with tab1:
             template='plotly_white',
             labels={'Gas Produced (MMSCFD)': 'Gas Volume'}
         )
-        fig.update_layout(
-            yaxis_title="Million cubic feet",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="gas_bar")
         
         fig = px.line(
             prod_data, x='Date', y='Hrs of Production',
@@ -423,16 +411,12 @@ with tab1:
             template='plotly_white',
             line_shape="spline"
         )
-        fig.update_layout(
-            yaxis_title="Hours",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="hours_line")
 
 with tab2:
     st.header("Pump Health Monitoring")
     
-    with st.expander("💡 Understanding Pump Metrics"):
+    with st.expander("💡 Understanding Pump Metrics", key="pump_metrics_expander"):
         st.markdown("""
         - **Frequency**: How fast the pump is running (higher = faster pumping)
         - **Motor Current**: Electrical current drawn by the pump motor
@@ -448,25 +432,14 @@ with tab2:
             title='Pump Speed (Hz)',
             template='plotly_white'
         )
-        fig.add_hrect(y0=0, y1=18, line_width=0, fillcolor="red", opacity=0.1)
-        fig.add_hrect(y0=18, y1=22, line_width=0, fillcolor="green", opacity=0.1)
-        fig.add_hrect(y0=22, y1=30, line_width=0, fillcolor="orange", opacity=0.1)
-        fig.update_layout(
-            yaxis_title="Hz (Cycles per second)",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="freq_line")
         
         fig = px.line(
             esp_data, x='DateTime', y='Intake Press psi',
             title='Intake Pressure (psi)',
             template='plotly_white'
         )
-        fig.update_layout(
-            yaxis_title="Pressure (psi)",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="pressure_line")
     
     with col2:
         fig = px.line(
@@ -474,14 +447,7 @@ with tab2:
             title='Motor Current Draw (Amps)',
             template='plotly_white'
         )
-        fig.add_hrect(y0=0, y1=1.5, line_width=0, fillcolor="red", opacity=0.1)
-        fig.add_hrect(y0=1.5, y1=3.0, line_width=0, fillcolor="green", opacity=0.1)
-        fig.add_hrect(y0=3.0, y1=5.0, line_width=0, fillcolor="orange", opacity=0.1)
-        fig.update_layout(
-            yaxis_title="Electrical Current (Amps)",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="current_line")
         
         fig = px.line(
             esp_data, x='DateTime', 
@@ -490,17 +456,12 @@ with tab2:
             template='plotly_white',
             labels={"value": "Temperature (°F)"}
         )
-        fig.update_traces(line=dict(dash='dash'), selector={'name':'Motor Temp Predicted (F)'})
-        fig.update_layout(
-            hovermode="x unified",
-            legend_title="Temperature Type"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="temp_comparison")
 
 with tab3:
     st.header("Equipment Alerts & Issues")
     
-    with st.expander("💡 Understanding Alerts"):
+    with st.expander("💡 Understanding Alerts", key="alerts_expander"):
         st.markdown("""
         - **Anomaly Score**: How many detection methods flagged an issue (0-3)
         - **Red Zones**: Values outside normal operating ranges
@@ -515,13 +476,13 @@ with tab3:
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Total Readings Analyzed", f"{total_readings:,}")
+        st.metric("Total Readings Analyzed", f"{total_readings:,}", key="total_readings")
     with col2:
         minor_issues = len(esp_data[esp_data['anomaly_score'] == 1])
-        st.metric("Minor Issues Detected", f"{minor_issues} ({minor_issues/total_readings:.1%})")
+        st.metric("Minor Issues Detected", f"{minor_issues} ({minor_issues/total_readings:.1%})", key="minor_issues")
     with col3:
         major_issues = len(esp_data[esp_data['anomaly_score'] >= 2])
-        st.metric("Major Issues Detected", f"{major_issues} ({major_issues/total_readings:.1%})")
+        st.metric("Major Issues Detected", f"{major_issues} ({major_issues/total_readings:.1%})", key="major_issues")
     
     # Visual alert timeline
     fig = px.scatter(
@@ -532,11 +493,7 @@ with tab3:
         labels={'anomaly_score': 'Problem Severity'},
         color_continuous_scale=px.colors.sequential.Reds
     )
-    fig.update_layout(
-        yaxis=dict(tickvals=[1, 2, 3], ticktext=["Minor", "Moderate", "Severe"]),
-        hovermode="x unified"
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="alert_timeline")
     
     # Detailed alerts
     st.subheader("Recent Alerts")
@@ -577,13 +534,7 @@ with tab4:
             title='Estimated Remaining Pump Life (hours)',
             template='plotly_white'
         )
-        fig.add_hline(y=100, line_dash="dot", line_color="red")
-        fig.add_hline(y=500, line_dash="dot", line_color="orange")
-        fig.update_layout(
-            yaxis_title="Remaining Hours",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="life_estimation")
         
         st.subheader("Short-Term Production Forecast (14 days)")
         fig = px.line(
@@ -592,12 +543,7 @@ with tab4:
             title='ARIMA Forecast',
             template='plotly_white'
         )
-        fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Barrels",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="arima_forecast")
         
     with col2:
         st.subheader("Long-Term Production Forecast (90 days)")
@@ -606,22 +552,11 @@ with tab4:
             title='Prophet Forecast',
             template='plotly_white'
         )
-        fig.add_scatter(
-            x=prod_data['Date'], 
-            y=prod_data['Gross Act (BBL)'], 
-            name='Actual Production',
-            mode='lines'
-        )
-        fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Barrels",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="prophet_forecast")
         
         st.subheader("Forecast Components")
         fig = prophet_model.plot_components(prophet_forecast)
-        st.pyplot(fig)
+        st.pyplot(fig, key="forecast_components")
 
 with tab5:
     st.header("Operational Insights")
@@ -635,7 +570,7 @@ with tab5:
             color='operating_mode',
             title='Equipment State Clusters'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="operating_modes")
         
         st.subheader("Anomaly Root Causes")
         fig = px.bar(
@@ -645,7 +580,7 @@ with tab5:
             orientation='h',
             title='Most Important Factors in Alerts'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="root_causes")
         
     with col2:
         st.subheader("AI-Generated Insights")
@@ -661,7 +596,7 @@ with tab5:
             <h4>Feature Importance for Temperature Prediction</h4>
         </div>
         """, unsafe_allow_html=True)
-        st.plotly_chart(importance_fig, use_container_width=True)
+        st.plotly_chart(importance_fig, use_container_width=True, key="feature_importance")
         
         st.markdown("""
         <div class="insight-card">
