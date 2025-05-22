@@ -638,8 +638,17 @@ with tab5:
         st.plotly_chart(fig, use_container_width=True)
         
         st.subheader("Anomaly Root Causes")
-        feature_importance['abs_imp'] = feature_importance['importance'].abs()
-        fig = px.bar(feature_importance, x='abs_imp', y='feature', orientation='h')
+        fig = px.bar(
+            feature_importance,
+            x='importance',
+            y='feature',
+            orientation='h',
+            title='Most Important Factors in Alerts'
+        )
+        fig.update_layout(xaxis_range=[feature_importance['importance'].min()*1.1, 
+                                      feature_importance['importance'].max()*1.1])
+        st.plotly_chart(fig, use_container_width=True)
+
 
         # fig = px.bar(
         #     feature_importance,
