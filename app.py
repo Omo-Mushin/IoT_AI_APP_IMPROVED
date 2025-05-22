@@ -79,7 +79,7 @@ def load_production_data():
     # In a real app, you would load from your actual data source
     # This creates sample data if the file isn't found
     try:
-        prod_data = pd.read_excel(r"Production_data.xlsx")
+        prod_data = pd.read_excel(r"C:\Users\HP\Desktop\ENGR YOMI ARTICLES\IoT_&_AI_App\Production_data.xlsx")
     except:
         print('This production data was Simulated')
         dates = pd.date_range(start='2023-01-01', end='2023-12-31')
@@ -102,7 +102,7 @@ def load_esp_data():
     # Replace with your actual loading logic
     # This creates sample data if the file isn't found
     try:
-        main_df3 = pd.read_excel(r"NEW_ESP_DATA.xlsx", sheet_name=None)
+        main_df3 = pd.read_excel(r"C:\Users\HP\Desktop\ENGR YOMI ARTICLES\IoT_&_AI_App\NEW_ESP_DATA.xlsx", sheet_name=None)
         monitor_dfs = list(main_df3.values())
         monitor_df = pd.concat(monitor_dfs, ignore_index=True)
         monitor_df = monitor_df.drop(columns=['Remark'], errors='ignore')
@@ -635,7 +635,7 @@ with tab5:
             color='operating_mode',
             title='Equipment State Clusters'
         )
-        # st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
         
         st.subheader("Anomaly Root Causes")
         fig = px.bar(
@@ -645,19 +645,7 @@ with tab5:
             orientation='h',
             title='Most Important Factors in Alerts'
         )
-        fig.update_layout(xaxis_range=[feature_importance['importance'].min()*1.1, 
-                                      feature_importance['importance'].max()*1.1])
         st.plotly_chart(fig, use_container_width=True)
-
-
-        # fig = px.bar(
-        #     feature_importance,
-        #     x='importance',
-        #     y='feature',
-        #     orientation='h',
-        #     title='Most Important Factors in Alerts'
-        # )
-        # st.plotly_chart(fig, use_container_width=True)
         
     with col2:
         st.subheader("AI-Generated Insights")
