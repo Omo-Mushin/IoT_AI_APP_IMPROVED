@@ -76,49 +76,68 @@ st.markdown("""
 # ----------------------
 @st.cache_data
 def load_production_data():
-    # In a real app, you would load from your actual data source
-    # This creates sample data if the file isn't found
     try:
-        prod_data = pd.read_excel(r"C:\Users\HP\Desktop\ENGR YOMI ARTICLES\IoT_&_AI_App\Production_data.xlsx")
-    except:
-        print('This production data was Simulated')
+        # Try loading real data first
+        prod_data = pd.read_excel("Production_data.xlsx")
+    except Exception as e:
+        st.warning(f"Using simulated data: {str(e)}")
+        # Create simulated data
         dates = pd.date_range(start='2023-01-01', end='2023-12-31')
         prod_data = pd.DataFrame({
             'Date': dates,
-            'Gross Act (BBL)': np.random.normal(500, 50, len(dates)).cumsum(),
+            'Gross_Act_BBL': np.random.normal(500, 50, len(dates)).cumsum(),
             'BSW': np.random.uniform(5, 15, len(dates)),
-            'Gas Produced (MMSCFD)': np.random.normal(2, 0.5, len(dates)),
-            'Hrs of Production': np.random.uniform(18, 24, len(dates))
+            'Gas_Produced_MMSCFD': np.random.normal(2, 0.5, len(dates)),
+            'Hrs_of_Production': np.random.uniform(18, 24, len(dates))
         })
     
-    prod_data['Date'] = pd.to_datetime(prod_data['Date'], format='%Y-%m-%d')
-    return prod_data.sort_values('Date')
+    prod_data['Date'] = pd.to_datetime(prod_data['Date'])
+    return prod_data
+
+@st.cache_data
+def load_esp_data():
+    try:
+        # Try loading real data first
+        esp_data = pd.read_excel("ESP_data.xlsx")
+    except Exception as e:
+        st.warning(f"Using simulated ESP data: {str(e)}")
+        # Create simulated data
+        dates = pd.date_range(start='2023-01-01', end='2023-12-31', freq='H')
+        esp_data = pd.DataFrame({
+            'DateTime': dates,
+            'Freq_Hz': np.random.normal(20, 2, len(dates)),
+            'Current_Amps': np.random.normal(2.5, 0.5, len(dates)),
+            'Intake_Press_psi': np.random.normal(500, 50, len(dates)),
+            'Motor_Temp_F': np.random.normal(150, 20, len(dates))
+        })
+    
+    return esp_data
 
 # ----------------------
 # 2. Load ESP Monitoring Data
 # ----------------------
-@st.cache_data
-def load_esp_data():
-    # Replace with your actual loading logic
-    # This creates sample data if the file isn't found
-    try:
-        main_df3 = pd.read_excel(r"C:\Users\HP\Desktop\ENGR YOMI ARTICLES\IoT_&_AI_App\NEW_ESP_DATA.xlsx", sheet_name=None)
-        monitor_dfs = list(main_df3.values())
-        monitor_df = pd.concat(monitor_dfs, ignore_index=True)
-        monitor_df = monitor_df.drop(columns=['Remark'], errors='ignore')
-    except:
-        print('This ESP data was Simulated')
-        dates = pd.date_range(start='2023-01-01', end='2023-12-31', freq='H')
-        monitor_df = pd.DataFrame({
-            'Date': dates,
-            'Freq (Hz)': np.random.normal(20, 2, len(dates)),
-            'Current (Amps)': np.random.normal(2.5, 0.5, len(dates)),
-            'Intake Press psi': np.random.normal(500, 50, len(dates)),
-            'Motor Temp (F)': np.random.normal(150, 20, len(dates))
-        })
+# @st.cache_data
+# def load_esp_data():
+#     # Replace with your actual loading logic
+#     # This creates sample data if the file isn't found
+#     try:
+#         main_df3 = pd.read_excel(r"C:\Users\HP\Desktop\ENGR YOMI ARTICLES\IoT_&_AI_App\NEW_ESP_DATA.xlsx", sheet_name=None)
+#         monitor_dfs = list(main_df3.values())
+#         monitor_df = pd.concat(monitor_dfs, ignore_index=True)
+#         monitor_df = monitor_df.drop(columns=['Remark'], errors='ignore')
+#     except:
+#         print('This ESP data was Simulated')
+#         dates = pd.date_range(start='2023-01-01', end='2023-12-31', freq='H')
+#         monitor_df = pd.DataFrame({
+#             'Date': dates,
+#             'Freq (Hz)': np.random.normal(20, 2, len(dates)),
+#             'Current (Amps)': np.random.normal(2.5, 0.5, len(dates)),
+#             'Intake Press psi': np.random.normal(500, 50, len(dates)),
+#             'Motor Temp (F)': np.random.normal(150, 20, len(dates))
+#         })
     
-    monitor_df['DateTime'] = pd.to_datetime(monitor_df['Date'], errors='coerce')
-    return monitor_df.sort_values('DateTime')
+#     monitor_df['DateTime'] = pd.to_datetime(monitor_df['Date'], errors='coerce')
+#     return monitor_df.sort_values('DateTime')
 
 # ----------------------
 # Data Processing
@@ -321,7 +340,7 @@ st.title("🛢️ AI-Powered Oil Well Monitoring Dashboard")
 # Status Overview
 st.header("Current System Status")
 
-# Explanation box
+
 with st.expander("ℹ️ What am I looking at?", key="overview_expander"):
     st.markdown("""
     This dashboard monitors your oil well equipment in real-time using AI. It shows:
